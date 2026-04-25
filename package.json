@@ -1,10 +1,16 @@
 {
-    "$schema": "https://www.schemastore.org/package.json",
     "private": true,
     "type": "module",
     "scripts": {
         "build": "vite build",
         "dev": "vite"
+    },
+    "dependencies": {
+        "axios": "^1.15.2",
+        "chart.js": "^4.5.1",
+        "flowbite": "^2.3.0",
+        "lucide": "^0.446.0",
+        "sweetalert2": "^11.26.24"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

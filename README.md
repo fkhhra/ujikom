@@ -1,58 +1,108 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Trivo - Expedition Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Trivo adalah platform manajemen ekspedisi modern berbasis fullstack yang dirancang untuk efisiensi pengiriman paket, mulai dari input di kasir hingga tracking real-time oleh pelanggan.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🛠️ Admin & Manager
+*   **Manajemen Cabang & Tarif:** Kelola master data cabang dan setting tarif pengiriman antar kota.
+*   **Manajemen User:** Administrasi akun Admin, Manajer, Kasir, dan Kurir.
+*   **Oversight Pengiriman:** Memantau seluruh paket, membatalkan resi, dan mengassign kurir ke paket tertentu.
+*   **Pelaporan:** Dashboard statistik dan fitur ekspor laporan pengiriman/pendapatan.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 💰 Kasir
+*   **Input Pengiriman:** Form input paket cepat dengan integrasi barcode.
+*   **Sistem Pembayaran:** Mendukung pembayaran tunai (Cash) dan otomatis cetak struk/resi (Waybill).
+*   **Penerimaan Paket:** Scan barcode saat paket tiba di cabang untuk update status secara kolektif.
 
-## Learning Laravel
+### 🚚 Kurir
+*   **Dashboard Pengantaran:** Daftar paket yang harus diantar ke penerima.
+*   **Update Status Real-time:** Fitur foto bukti kirim dan update status "Terkirim" langsung dari lapangan.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 👤 Pelanggan
+*   **Dashboard Personal:** Memantau daftar paket keluar (dikirim) dan paket masuk (diterima) secara terpisah.
+*   **Pembayaran Online:** Integrasi Midtrans untuk pembayaran via QRIS, GoPay, dan Virtual Account.
+*   **Tracking Detail:** Riwayat perjalanan paket yang detail dan transparan.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🛠️ Tech Stack
 
-## Agentic Development
+*   **Framework:** [Laravel 13](https://laravel.com)
+*   **PHP Version:** 8.4 (Optimized for Docker)
+*   **Frontend:** Tailwind CSS 4.0 + Flowbite (Premium UI)
+*   **Database:** MySQL 8.4
+*   **Integration:** Midtrans Core API (Payment Gateway)
+*   **Icons:** Lucide Icons
+*   **Containerization:** Docker & Docker Compose
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## 📦 Instalasi & Menjalankan Proyek
 
-php artisan boost:install
-```
+Pastikan Anda sudah menginstal **Docker** dan **Docker Compose** di sistem Anda.
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+1.  **Clone Repositori:**
+    ```bash
+    git clone https://github.com/Fruzh/trivo.git
+    cd trivo
+    ```
 
-## Contributing
+2.  **Konfigurasi Environment:**
+    ```bash
+    cp .env.example .env
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3.  **Build & Jalankan Container:**
+    ```bash
+    docker compose up -d --build
+    ```
 
-## Code of Conduct
+4.  **Install Dependensi & Reset Database:**
+    ```bash
+    docker exec trivo_app composer install
+    docker exec trivo_app php artisan migrate:fresh --seed --force
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5.  **Akses Aplikasi:**
+    Buka `http://localhost:8000` di browser Anda.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🔑 Akun Default (Testing)
 
-## License
+Semua akun di bawah menggunakan password: `password`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 🏢 Staff (Akses via `/staff/login`)
+
+| Role | Nama | Email | Cabang |
+| :--- | :--- | :--- | :--- |
+| **Admin** | Super Admin | `admin@trivo.id` | Pusat |
+| **Manager** | Budi Santoso | `manager.jkt@trivo.id` | Jakarta |
+| **Manager** | Sari Dewi | `manager.bdg@trivo.id` | Bandung |
+| **Manager** | Hendra Wijaya | `manager.sby@trivo.id` | Surabaya |
+| **Kasir** | Rina Kasir | `kasir1.jkt@trivo.id` | Jakarta |
+| **Kasir** | Wati Kasir | `kasir1.bdg@trivo.id` | Bandung |
+| **Kurir** | Zaki Kurir | `kurir1.jkt@trivo.id` | Jakarta |
+| **Kurir** | Gilang Kurir | `kurir1.bdg@trivo.id` | Bandung |
+
+### 👤 Pelanggan (Akses via `/login`)
+
+| Nama | Email | Kota |
+| :--- | :--- | :--- |
+| Ahmad Fauzi | `ahmad@example.com` | Jakarta |
+| Siti Rahayu | `siti@example.com` | Bandung |
+| Budi Prakoso | `budi@example.com` | Surabaya |
+| Dewi Lestari | `dewi@example.com` | Yogyakarta |
+
+---
+
+## 📂 Struktur Penting (Backend)
+
+*   `app/Http/Controllers/Admin/`: Logika manajemen platform.
+*   `app/Http/Controllers/Cashier/`: Logika transaksi loket dan pembayaran tunai.
+*   `app/Http/Controllers/Courier/`: Logika update status pengiriman lapangan.
+*   `app/Http/Controllers/Customer/`: Dashboard dan payment gateaway pelanggan.
+*   `app/Models/Shipment.php`: Inti dari sistem (Tracking Number, Status, Relationships).
