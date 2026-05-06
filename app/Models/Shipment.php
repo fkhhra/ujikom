@@ -90,6 +90,8 @@ class Shipment extends Model
             'arrived_at_branch' => 'Tiba di Cabang',
             'out_for_delivery'  => 'Sedang Diantar',
             'delivered'         => 'Terkirim',
+            'cancelled'         => 'Dibatalkan',
+            default             => 'Tidak Diketahui',
         };
     }
 

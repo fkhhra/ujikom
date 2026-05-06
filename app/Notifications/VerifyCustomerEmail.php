@@ -20,12 +20,13 @@ class VerifyCustomerEmail extends VerifyEmail
     {
         $verificationUrl = $this->verificationUrl($notifiable);
 
-        return (new MailMessage)
-            ->subject('Verifikasi Email - KirimAja')
-            ->view('emails.verify-email', [
-                'user' => $notifiable,
-                'verificationUrl' => $verificationUrl,
-            ]);
+       return (new MailMessage)
+    ->subject('Verifikasi Email - Trivo')
+    ->greeting('Halo ' . $notifiable->name)
+    ->line('Silakan klik tombol di bawah untuk verifikasi email kamu.')
+    ->action('Verifikasi Email', $verificationUrl)
+    ->line('Jika kamu tidak merasa mendaftar, abaikan email ini.');
+        
     }
 
     /**

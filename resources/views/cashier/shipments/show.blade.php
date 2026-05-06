@@ -59,7 +59,7 @@
                     <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     <span class="text-sm font-semibold text-green-700">Pembayaran Lunas</span>
                 </div>
-                <a href="{{ route('cashier.payments.print-receipt', $shipment->payment) }}" target="_blank" class="block w-full text-center bg-[#1a2d5a] hover:bg-[#162250] text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Cetak Struk</a>
+                <a href="{{ route('cashier.payments.print', $shipment->payment) }}" target="_blank" class="block w-full text-center bg-[#1a2d5a] hover:bg-[#162250] text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Cetak Struk</a>
             @elseif($shipment->payer_type === 'sender')
                 <p class="text-sm text-gray-500 mb-3">Total: <span class="font-bold text-[#1a2d5a]">Rp {{ number_format($shipment->total_price, 0, ',', '.') }}</span></p>
                 <form action="{{ route('cashier.shipments.pay-cash', $shipment) }}" method="POST">

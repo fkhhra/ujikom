@@ -36,7 +36,7 @@
                     </td>
                     <td class="px-5 py-3.5">
                         @if($p->payment_status === 'paid')
-                            <a href="{{ route('cashier.payments.print-receipt', $p) }}" target="_blank" class="text-[#6abf2e] text-xs font-semibold hover:underline">Cetak</a>
+                            <a href="{{ route('cashier.payments.print', $p) }}" target="_blank" class="text-[#6abf2e] text-xs font-semibold hover:underline">Cetak</a>
                         @elseif($p->shipment)
                             <a href="{{ route('cashier.payments.create', $p->shipment) }}" class="text-[#1a2d5a] text-xs font-semibold hover:underline">Bayar</a>
                         @endif
