@@ -123,12 +123,18 @@ class ShipmentController extends Controller
     {
         $shipment->load(['sender', 'receiver', 'originBranch', 'destinationBranch', 'items', 'payment']);
         
+        $logoPath = public_path('images/logo_light.png');
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoBase64 = base64_encode(file_get_contents($logoPath));
+        }
+
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $barcode = base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128));
 
         $qrcode = base64_encode(\SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(150)->margin(0)->generate($shipment->tracking_number));
 
-        $pdf = Pdf::loadView('pdf.shipment-waybill', compact('shipment', 'barcode', 'qrcode'))
+        $pdf = Pdf::loadView('pdf.shipment-waybill', compact('shipment', 'barcode', 'qrcode', 'logoBase64'))
                   ->setPaper('a5', 'landscape');
 
         return $pdf->stream('Waybill_' . $shipment->tracking_number . '.pdf');

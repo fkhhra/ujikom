@@ -1,213 +1,252 @@
 @extends('layouts.dashboard')
-@section('title', 'Buat Pengiriman - Kasir Trivo')
-@section('sidebar')
-@include('components.cashier-sidebar')
-@endsection
-@section('main-content')
-<div class="mb-6">
-    <a href="{{ route('cashier.shipments.index') }}" class="text-sm text-gray-500 hover:text-[#1a2b5c] transition-colors">← Kembali</a>
-    <h1 class="text-2xl font-extrabold text-[#1a2b5c] mt-1">Buat Pengiriman Baru</h1>
-</div>
+@section('title', 'Buat Pengiriman')
+@section('page-title', 'Buat Pengiriman Baru')
 
-<form method="POST" action="{{ route('cashier.shipments.store') }}" id="shipment-form">
-    @csrf
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="lg:col-span-2 space-y-5">
+@push('styles')
+<style>
+.form-section { background: white; border-radius: 0.75rem; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 1.25rem; margin-bottom: 1rem; }
+.form-section h4 { font-weight: 700; color: #1a2d5a; font-size: 0.875rem; margin-bottom: 1rem; padding-bottom: 0.625rem; border-bottom: 1px solid #f1f5f9; }
+</style>
+@endpush
 
-            {{-- PENGIRIM & PENERIMA --}}
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h2 class="font-bold text-[#1a2b5c] mb-4 text-sm">Data Pengirim & Penerima</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+@section('content')
+<div class="w-full">
+    <a href="{{ route('cashier.shipments.index') }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#1a2d5a] mb-5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Kembali
+    </a>
+
+    <form action="{{ route('cashier.shipments.store') }}" method="POST" id="shipment-form">
+        @csrf
+        <div class="grid md:grid-cols-2 gap-5">
+            {{-- Pengirim --}}
+            <div class="form-section">
+                <h4>Data Pengirim</h4>
+                <div class="space-y-3">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pengirim</label>
-                        <select name="sender_id" required
-                            class="w-full border @error('sender_id') border-red-400 @else border-gray-300 @enderror rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                            <option value="">Pilih pengirim...</option>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pelanggan Pengirim</label>
+                        <select name="sender_id" id="sender-select" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white @error('sender_id') border-red-400 @enderror">
+                            <option value="">Pilih pelanggan...</option>
                             @foreach($customers as $c)
-                            <option value="{{ $c->id }}" {{ old('sender_id')==$c->id?'selected':'' }}>{{ $c->name }} — {{ $c->phone }}</option>
+                                <option value="{{ $c->id }}" {{ old('sender_id')==$c->id ? 'selected' : '' }}>{{ $c->name }} - {{ $c->phone }}</option>
                             @endforeach
                         </select>
-                        @error('sender_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
+                    <button type="button" onclick="openNewCustomerModal('sender')" class="text-xs text-[#6abf2e] font-semibold hover:underline">+ Tambah pelanggan baru</button>
+                </div>
+            </div>
+
+            {{-- Penerima --}}
+            <div class="form-section">
+                <h4>Data Penerima</h4>
+                <div class="space-y-3">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Penerima</label>
-                        <select name="receiver_id" required
-                            class="w-full border @error('receiver_id') border-red-400 @else border-gray-300 @enderror rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                            <option value="">Pilih penerima...</option>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pelanggan Penerima</label>
+                        <select name="receiver_id" id="receiver-select" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white @error('receiver_id') border-red-400 @enderror">
+                            <option value="">Pilih pelanggan...</option>
                             @foreach($customers as $c)
-                            <option value="{{ $c->id }}" {{ old('receiver_id')==$c->id?'selected':'' }}>{{ $c->name }} — {{ $c->phone }}</option>
+                                <option value="{{ $c->id }}" {{ old('receiver_id')==$c->id ? 'selected' : '' }}>{{ $c->name }} - {{ $c->phone }}</option>
                             @endforeach
                         </select>
-                        @error('receiver_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
+                    <button type="button" onclick="openNewCustomerModal('receiver')" class="text-xs text-[#6abf2e] font-semibold hover:underline">+ Tambah pelanggan baru</button>
                 </div>
             </div>
+        </div>
 
-            {{-- CABANG & RUTE --}}
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h2 class="font-bold text-[#1a2b5c] mb-4 text-sm">Rute Pengiriman</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Cabang Asal</label>
-                        <select name="origin_branch_id" required id="origin-branch"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                            @foreach($branches as $b)
-                            <option value="{{ $b->id }}" {{ ($userBranch && $userBranch->id==$b->id) || old('origin_branch_id')==$b->id?'selected':'' }}>{{ $b->name }} — {{ $b->city }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Cabang Tujuan</label>
-                        <select name="destination_branch_id" required id="dest-branch"
-                            class="w-full border @error('destination_branch_id') border-red-400 @else border-gray-300 @enderror rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                            <option value="">Pilih cabang tujuan...</option>
-                            @foreach($branches as $b)
-                            <option value="{{ $b->id }}" {{ old('destination_branch_id')==$b->id?'selected':'' }}>{{ $b->name }} — {{ $b->city }}</option>
-                            @endforeach
-                        </select>
-                        @error('destination_branch_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tarif</label>
-                        <select name="rate_id" required id="rate-select"
-                            class="w-full border @error('rate_id') border-red-400 @else border-gray-300 @enderror rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                            <option value="">Pilih tarif...</option>
-                            @foreach($rates as $r)
-                            <option value="{{ $r->id }}" data-price="{{ $r->price_per_kg }}" {{ old('rate_id')==$r->id?'selected':'' }}>
-                                {{ $r->origin_city }} → {{ $r->destination_city }} | Rp {{ number_format($r->price_per_kg,0,',','.') }}/kg | {{ $r->estimated_days }} hari
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('rate_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal Kirim</label>
-                        <input type="date" name="shipment_date" value="{{ old('shipment_date', date('Y-m-d')) }}" required
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-                    </div>
+        {{-- Rute --}}
+        <div class="form-section">
+            <h4>Rute Pengiriman</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Cabang Asal</label>
+                    <select name="origin_branch_id" id="origin-branch" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white @error('origin_branch_id') border-red-400 @enderror">
+                        @foreach($branches as $b)
+                            <option value="{{ $b->id }}" data-city="{{ $b->city }}" {{ old('origin_branch_id', $userBranch?->id)==$b->id ? 'selected' : '' }}>{{ $b->city }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Cabang Tujuan</label>
+                    <select name="destination_branch_id" id="destination-branch" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white @error('destination_branch_id') border-red-400 @enderror">
+                        <option value="">Pilih tujuan</option>
+                        @foreach($branches as $b)
+                            <option value="{{ $b->id }}" data-city="{{ $b->city }}" {{ old('destination_branch_id')==$b->id ? 'selected' : '' }}>{{ $b->city }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Tarif</label>
+                    <select name="rate_id" id="rate-select" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white @error('rate_id') border-red-400 @enderror">
+                        <option value="">Pilih tarif</option>
+                        @foreach($rates as $r)
+                            <option value="{{ $r->id }}" data-origin="{{ $r->origin_city }}" data-destination="{{ $r->destination_city }}" {{ old('rate_id')==$r->id ? 'selected' : '' }}>{{ $r->origin_city }} → {{ $r->destination_city }} (Rp {{ number_format($r->price_per_kg, 0, ',', '.') }}/kg)</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Kirim</label>
+                    <input type="date" name="shipment_date" value="{{ old('shipment_date', date('Y-m-d')) }}" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none @error('shipment_date') border-red-400 @enderror">
                 </div>
             </div>
-
-            {{-- ITEMS --}}
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="font-bold text-[#1a2b5c] text-sm">Item Paket</h2>
-                    <button type="button" id="add-item" class="bg-[#6abf2e] hover:bg-[#4e9020] text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-all">+ Tambah Item</button>
-                </div>
-                @error('items')<p class="text-red-500 text-xs mb-2">{{ $message }}</p>@enderror
-                <div id="items-container" class="space-y-3">
-                    <div class="item-row grid grid-cols-12 gap-2 items-end">
-                        <div class="col-span-6">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Item</label>
-                            <input type="text" name="items[0][item_name]" required placeholder="Nama barang..."
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none item-name">
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Qty</label>
-                            <input type="number" name="items[0][quantity]" required min="1" value="1"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-                        </div>
-                        <div class="col-span-3">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Berat (kg)</label>
-                            <input type="number" name="items[0][weight]" required min="0.01" step="0.01" placeholder="0.00"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none item-weight">
-                        </div>
-                        <div class="col-span-1 flex justify-center">
-                            <span class="text-gray-300 text-lg select-none mt-1">—</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- PEMBAYAR --}}
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h2 class="font-bold text-[#1a2b5c] mb-4 text-sm">Pembayar</h2>
+            <div class="mt-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Pihak yang Membayar</label>
                 <div class="flex gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="payer_type" value="sender" {{ old('payer_type','sender')=='sender'?'checked':'' }} class="w-4 h-4 text-[#1a2b5c]">
-                        <span class="text-sm font-medium text-gray-700">Pengirim</span>
+                        <input type="radio" name="payer_type" value="sender" {{ old('payer_type','sender')==='sender' ? 'checked' : '' }} class="text-[#6abf2e] focus:ring-[#6abf2e]">
+                        <span class="text-sm">Pengirim</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="payer_type" value="receiver" {{ old('payer_type')=='receiver'?'checked':'' }} class="w-4 h-4 text-[#1a2b5c]">
-                        <span class="text-sm font-medium text-gray-700">Penerima</span>
+                        <input type="radio" name="payer_type" value="receiver" {{ old('payer_type')==='receiver' ? 'checked' : '' }} class="text-[#6abf2e] focus:ring-[#6abf2e]">
+                        <span class="text-sm">Penerima (COD)</span>
                     </label>
                 </div>
             </div>
         </div>
 
-        {{-- SUMMARY SIDEBAR --}}
-        <div>
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm sticky top-24">
-                <h3 class="font-bold text-[#1a2b5c] text-sm mb-4">Ringkasan</h3>
-                <div class="space-y-3 text-sm mb-5">
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Total Berat</span>
-                        <span class="font-semibold" id="summary-weight">0 kg</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Tarif/kg</span>
-                        <span class="font-semibold" id="summary-rate">Rp 0</span>
-                    </div>
-                    <div class="border-t border-gray-100 pt-2 flex justify-between">
-                        <span class="font-semibold text-gray-700">Estimasi Total</span>
-                        <span class="font-bold text-[#6abf2e] text-base" id="summary-total">Rp 0</span>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-[#1a2b5c] hover:bg-[#111e42] text-white font-semibold py-3 rounded-lg text-sm transition-all">
-                    Simpan Pengiriman
+        {{-- Items --}}
+        <div class="form-section">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-50">
+                <h4 class="!mb-0 !pb-0 !border-0">Item Paket</h4>
+                <button type="button" onclick="addItem()" class="inline-flex items-center gap-1.5 bg-[#6abf2e] hover:bg-[#5aaa25] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Tambah Item
                 </button>
             </div>
+            <div id="items-container" class="space-y-3">
+                <div class="item-row grid grid-cols-3 gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Nama Item</label>
+                        <input type="text" name="items[0][item_name]" placeholder="Nama barang" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Qty</label>
+                        <input type="number" name="items[0][quantity]" value="1" min="1" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Berat (kg)</label>
+                        <input type="number" name="items[0][weight]" step="0.01" min="0.01" placeholder="0.5" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit" class="bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-bold px-8 py-3 rounded-xl text-sm transition-colors">
+                Simpan Pengiriman
+            </button>
+            <a href="{{ route('cashier.shipments.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl text-sm transition-colors">Batal</a>
+        </div>
+    </form>
+</div>
+
+{{-- Modal tambah customer --}}
+<div id="customer-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="font-bold text-[#1a2d5a]">Tambah Pelanggan Baru</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="space-y-3" id="modal-form">
+            <input type="text" id="new-name" placeholder="Nama" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none">
+            <input type="tel" id="new-phone" placeholder="No. HP" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none">
+            <input type="text" id="new-city" placeholder="Kota" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none">
+            <textarea id="new-address" rows="2" placeholder="Alamat" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none resize-none"></textarea>
+            <input type="email" id="new-email" placeholder="Email (opsional)" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none">
+        </div>
+        <div id="modal-error" class="hidden mt-3 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg"></div>
+        <div class="flex gap-3 mt-5">
+            <button onclick="saveCustomer()" class="flex-1 bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">Simpan</button>
+            <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl text-sm">Batal</button>
         </div>
     </div>
-</form>
+</div>
 @endsection
 
 @push('scripts')
 <script>
-let itemCount = 1;
-const fmt = n => 'Rp ' + Intl.NumberFormat('id-ID').format(n);
+let itemIndex = 1;
+let targetSelect = null;
 
-function calcTotal() {
-    let totalWeight = 0;
-    document.querySelectorAll('.item-weight').forEach(el => {
-        totalWeight += parseFloat(el.value) || 0;
-    });
-    const rateOption = document.getElementById('rate-select').selectedOptions[0];
-    const pricePerKg = parseFloat(rateOption?.dataset.price) || 0;
-    const total = totalWeight * pricePerKg;
-    document.getElementById('summary-weight').textContent = totalWeight.toFixed(2) + ' kg';
-    document.getElementById('summary-rate').textContent = fmt(pricePerKg);
-    document.getElementById('summary-total').textContent = fmt(total);
+function addItem() {
+    const container = document.getElementById('items-container');
+    const div = document.createElement('div');
+    div.className = 'item-row grid grid-cols-3 gap-3 p-3 bg-gray-50 rounded-xl relative';
+    div.innerHTML = `
+        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nama Item</label><input type="text" name="items[${itemIndex}][item_name]" placeholder="Nama barang" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white"></div>
+        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Qty</label><input type="number" name="items[${itemIndex}][quantity]" value="1" min="1" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white"></div>
+        <div class="relative"><label class="block text-xs font-semibold text-gray-500 mb-1">Berat (kg)</label><input type="number" name="items[${itemIndex}][weight]" step="0.01" min="0.01" placeholder="0.5" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white"><button type="button" onclick="this.closest('.item-row').remove()" class="absolute -top-6 right-0 text-red-400 hover:text-red-600 text-xs">Hapus</button></div>
+    `;
+    container.appendChild(div);
+    itemIndex++;
 }
 
-document.getElementById('rate-select').addEventListener('change', calcTotal);
-document.getElementById('items-container').addEventListener('input', calcTotal);
+function openNewCustomerModal(target) {
+    targetSelect = target === 'sender' ? document.getElementById('sender-select') : document.getElementById('receiver-select');
+    document.getElementById('customer-modal').classList.remove('hidden');
+    document.getElementById('new-name').value = '';
+    document.getElementById('new-phone').value = '';
+    document.getElementById('new-city').value = '';
+    document.getElementById('new-address').value = '';
+    document.getElementById('new-email').value = '';
+    document.getElementById('modal-error').classList.add('hidden');
+}
 
-document.getElementById('add-item').addEventListener('click', function() {
-    const container = document.getElementById('items-container');
-    const row = document.createElement('div');
-    row.className = 'item-row grid grid-cols-12 gap-2 items-end';
-    row.innerHTML = `
-        <div class="col-span-6">
-            <input type="text" name="items[${itemCount}][item_name]" required placeholder="Nama barang..."
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-        </div>
-        <div class="col-span-2">
-            <input type="number" name="items[${itemCount}][quantity]" required min="1" value="1"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-        </div>
-        <div class="col-span-3">
-            <input type="number" name="items[${itemCount}][weight]" required min="0.01" step="0.01" placeholder="0.00"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none item-weight">
-        </div>
-        <div class="col-span-1 flex justify-center">
-            <button type="button" onclick="this.closest('.item-row').remove(); calcTotal();"
-                class="w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>`;
-    container.appendChild(row);
-    itemCount++;
-});
+function closeModal() { document.getElementById('customer-modal').classList.add('hidden'); }
+
+async function saveCustomer() {
+    const data = { name: document.getElementById('new-name').value, phone: document.getElementById('new-phone').value, city: document.getElementById('new-city').value, address: document.getElementById('new-address').value, email: document.getElementById('new-email').value };
+    const errDiv = document.getElementById('modal-error');
+    errDiv.classList.add('hidden');
+    try {
+        const res = await fetch('{{ route("cashier.customers.quick-store") }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, body: JSON.stringify(data) });
+        const json = await res.json();
+        if (!res.ok) { errDiv.textContent = Object.values(json.errors || {}).flat().join(', '); errDiv.classList.remove('hidden'); return; }
+        const opt = new Option(`${json.name} - ${json.phone}`, json.id, true, true);
+        targetSelect.appendChild(opt);
+        closeModal();
+    } catch(e) { errDiv.textContent = 'Terjadi kesalahan. Coba lagi.'; errDiv.classList.remove('hidden'); }
+}
+
+const originSelect = document.getElementById('origin-branch');
+const destinationSelect = document.getElementById('destination-branch');
+const rateSelect = document.getElementById('rate-select');
+
+function autoSelectRate() {
+    const originOption = originSelect?.options[originSelect.selectedIndex];
+    const destinationOption = destinationSelect?.options[destinationSelect.selectedIndex];
+    
+    if (!originOption || !destinationOption) return;
+    
+    const originCity = originOption.getAttribute('data-city');
+    const destinationCity = destinationOption.getAttribute('data-city');
+    
+    if (!originCity || !destinationCity) {
+        if (rateSelect) rateSelect.value = '';
+        return;
+    }
+    
+    let found = false;
+    if (rateSelect) {
+        for (let i = 0; i < rateSelect.options.length; i++) {
+            const opt = rateSelect.options[i];
+            if (opt.getAttribute('data-origin') === originCity && opt.getAttribute('data-destination') === destinationCity) {
+                rateSelect.selectedIndex = i;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            rateSelect.value = '';
+        }
+    }
+}
+
+originSelect?.addEventListener('change', autoSelectRate);
+destinationSelect?.addEventListener('change', autoSelectRate);
+
+// Trigger on load
+autoSelectRate();
 </script>
 @endpush

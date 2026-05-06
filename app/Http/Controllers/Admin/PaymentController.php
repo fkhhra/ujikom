@@ -40,11 +40,17 @@ class PaymentController extends Controller
         $shipment = $payment->shipment;
         $shipment->load(['sender', 'receiver', 'originBranch', 'destinationBranch', 'items', 'payment']);
         
+        $logoPath = public_path('images/logo_dark.png');
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoBase64 = base64_encode(file_get_contents($logoPath));
+        }
+
         $itemCount = $shipment->items->count() ?: 1;
         $dynamicHeight = 280 + ($itemCount * 20) + 40;
         
         $customPaper = array(0, 0, 164.4, $dynamicHeight);
-        $pdf = Pdf::loadView('pdf.payment-receipt', compact('shipment'))
+        $pdf = Pdf::loadView('pdf.payment-receipt', compact('shipment', 'logoBase64'))
                   ->setPaper($customPaper);
 
         return $pdf->stream('Receipt_' . $shipment->tracking_number . '.pdf');

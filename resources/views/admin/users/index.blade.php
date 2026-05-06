@@ -1,120 +1,89 @@
 @extends('layouts.dashboard')
-@section('title', 'Pengguna - Trivo Admin')
+@section('title', 'Staff')
+@section('page-title', 'Manajemen Staff')
 
-@section('sidebar')
-@include('components.admin-sidebar')
-@endsection
-
-@section('main-content')
-<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-    <div>
-        <h1 class="text-2xl font-extrabold text-[#1a2b5c]">Pengguna</h1>
-        <p class="text-gray-500 text-sm">Kelola akun staff dan kurir</p>
-    </div>
-    <a href="{{ route('admin.users.create') }}" class="bg-[#6abf2e] hover:bg-[#4e9020] text-white font-semibold px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Tambah Pengguna
+@section('content')
+<div class="flex justify-end mb-4">
+    <a href="{{ route('admin.users.create') }}" class="inline-flex items-center gap-2 bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Tambah Staff
     </a>
 </div>
-
-<div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-5">
-    <form method="GET" class="flex flex-wrap gap-3 items-end">
-        <div class="flex-1 min-w-48">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Cari</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama atau email..."
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-        </div>
-        <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Role</label>
-            <select name="role" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div class="p-4 border-b border-gray-50">
+        <form method="GET" class="flex flex-wrap gap-3">
+            <div class="flex-1 min-w-48 relative">
+                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / email..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none">
+            </div>
+            <select name="role" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
                 <option value="">Semua Role</option>
-                <option value="admin" {{ request('role')=='admin'?'selected':'' }}>Admin</option>
-                <option value="manager" {{ request('role')=='manager'?'selected':'' }}>Manager</option>
-                <option value="cashier" {{ request('role')=='cashier'?'selected':'' }}>Kasir</option>
-                <option value="courier" {{ request('role')=='courier'?'selected':'' }}>Kurir</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Cabang</label>
-            <select name="branch_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                <option value="">Semua Cabang</option>
-                @foreach($branches as $branch)
-                <option value="{{ $branch->id }}" {{ request('branch_id')==$branch->id?'selected':'' }}>{{ $branch->name }}</option>
+                @foreach(['admin'=>'Admin','manager'=>'Manager','cashier'=>'Kasir','courier'=>'Kurir'] as $v => $l)
+                    <option value="{{ $v }}" {{ request('role')===$v ? 'selected' : '' }}>{{ $l }}</option>
                 @endforeach
             </select>
-        </div>
-        <button type="submit" class="bg-[#1a2b5c] hover:bg-[#111e42] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">Filter</button>
-        @if(request()->anyFilled(['search','role','branch_id']))
-        <a href="{{ route('admin.users.index') }}" class="text-sm text-gray-500 hover:text-red-500 py-2">Reset</a>
-        @endif
-    </form>
-</div>
-
-<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <select name="branch_id" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                <option value="">Semua Cabang</option>
+                @foreach($branches as $b)<option value="{{ $b->id }}" {{ request('branch_id')==$b->id ? 'selected' : '' }}>{{ $b->name }}</option>@endforeach
+            </select>
+            <button type="submit" class="bg-[#1a2d5a] text-white text-sm font-semibold px-5 py-2 rounded-lg">Filter</button>
+        </form>
+    </div>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <tr>
-                    <th class="px-5 py-3 text-left">Nama</th>
-                    <th class="px-5 py-3 text-left">Email</th>
-                    <th class="px-5 py-3 text-left">Role</th>
-                    <th class="px-5 py-3 text-left">Cabang</th>
-                    <th class="px-5 py-3 text-left">Status</th>
-                    <th class="px-5 py-3 text-left">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse($users as $user)
-                <tr class="hover:bg-gray-50 transition-colors {{ $user->trashed() ? 'opacity-50' : '' }}">
-                    <td class="px-5 py-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-[#1a2b5c] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                {{ strtoupper(substr($user->name, 0, 2)) }}
-                            </div>
-                            <span class="font-semibold text-gray-800">{{ $user->name }}</span>
+            <thead class="bg-gray-50"><tr>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nama</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Email</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Cabang</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+                <th class="px-5 py-3"></th>
+            </tr></thead>
+            <tbody class="divide-y divide-gray-50">
+                @forelse($users as $u)
+                <tr class="hover:bg-gray-50/50 {{ $u->trashed() ? 'opacity-50' : '' }}">
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-[#1a2d5a] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">{{ strtoupper(substr($u->name,0,1)) }}</div>
+                            <span class="font-medium text-gray-700">{{ $u->name }}</span>
                         </div>
                     </td>
-                    <td class="px-5 py-3 text-gray-600">{{ $user->email }}</td>
-                    <td class="px-5 py-3">
-                        @php
-                        $roleColors = ['admin'=>'bg-purple-100 text-purple-700','manager'=>'bg-blue-100 text-blue-700','cashier'=>'bg-yellow-100 text-yellow-700','courier'=>'bg-green-100 text-green-700'];
-                        $rc = $roleColors[$user->role] ?? 'bg-gray-100 text-gray-700';
-                        @endphp
-                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $rc }} capitalize">{{ $user->role }}</span>
+                    <td class="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{{ $u->email }}</td>
+                    <td class="px-5 py-3.5">
+                        @php $roleColors = ['admin'=>'bg-purple-100 text-purple-700','manager'=>'bg-blue-100 text-blue-700','cashier'=>'bg-orange-100 text-orange-700','courier'=>'bg-green-100 text-green-700']; @endphp
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $roleColors[$u->role] ?? 'bg-gray-100 text-gray-700' }} capitalize">{{ $u->role }}</span>
                     </td>
-                    <td class="px-5 py-3 text-gray-500 text-xs">{{ $user->branch?->name ?? '-' }}</td>
-                    <td class="px-5 py-3">
-                        @if($user->trashed())
-                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">Nonaktif</span>
+                    <td class="px-5 py-3.5 text-gray-500 text-xs hidden md:table-cell">{{ $u->branch?->name ?? '-' }}</td>
+                    <td class="px-5 py-3.5">
+                        @if($u->trashed())
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Nonaktif</span>
                         @else
-                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Aktif</span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Aktif</span>
                         @endif
                     </td>
-                    <td class="px-5 py-3">
-                        <div class="flex items-center gap-3">
-                            <a href="{{ route('admin.users.edit', $user) }}" class="text-[#1a2b5c] hover:text-[#6abf2e] font-semibold text-xs transition-colors">Edit</a>
-                            @if(!$user->trashed())
-                            <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Nonaktifkan pengguna ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-700 font-semibold text-xs transition-colors">Nonaktifkan</button>
-                            </form>
+                    <td class="px-5 py-3.5">
+                        <div class="flex gap-3">
+                            @if(!$u->trashed())
+                                <a href="{{ route('admin.users.edit', $u->id) }}" class="text-[#6abf2e] text-xs font-semibold hover:underline">Edit</a>
+                                <form action="{{ route('admin.users.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Nonaktifkan user ini?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="text-red-500 text-xs font-semibold hover:underline">Nonaktif</button>
+                                </form>
                             @else
-                            <form method="POST" action="{{ route('admin.users.restore', $user) }}">
-                                @csrf @method('PATCH')
-                                <button type="submit" class="text-green-600 hover:text-green-800 font-semibold text-xs transition-colors">Aktifkan</button>
-                            </form>
+                                <form action="{{ route('admin.users.restore', $u->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="text-blue-500 text-xs font-semibold hover:underline">Aktifkan</button>
+                                </form>
                             @endif
                         </div>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="text-center py-12 text-gray-400 text-sm">Tidak ada pengguna</td></tr>
+                <tr><td colspan="6" class="px-5 py-10 text-center text-gray-400">Belum ada data staff</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    @if($users->hasPages())
-    <div class="px-5 py-4 border-t border-gray-100">{{ $users->links() }}</div>
-    @endif
+    @if($users->hasPages())<div class="p-4 border-t border-gray-50">{{ $users->links() }}</div>@endif
 </div>
 @endsection

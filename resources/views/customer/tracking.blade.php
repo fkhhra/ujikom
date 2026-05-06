@@ -1,133 +1,137 @@
-@extends('layouts.dashboard')
-@section('title', 'Lacak Paket - Trivo')
+@extends('layouts.customer')
+@section('title', 'Lacak Paket ' . $shipment->tracking_number)
 
-@section('sidebar')
-@include('components.customer-sidebar')
-@endsection
-
-@section('main-content')
+@section('content')
 <div class="mb-5">
-    <a href="{{ route('customer.dashboard') }}" class="text-sm text-gray-500 hover:text-[#1a2b5c] transition-colors">← Kembali</a>
-    <h1 class="text-2xl font-extrabold text-[#1a2b5c] mt-1">Detail Pengiriman</h1>
-    <p class="text-gray-500 text-sm font-mono">{{ $shipment->tracking_number }}</p>
+    <a href="{{ route('customer.dashboard') }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#1a2d5a]">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Kembali ke Dashboard
+    </a>
 </div>
 
-@php
-$statusMap = [
-    'pending' => ['Menunggu', 'bg-yellow-100 text-yellow-700 border-yellow-200'],
-    'picked_up' => ['Diambil Kurir', 'bg-blue-100 text-blue-700 border-blue-200'],
-    'in_transit' => ['Dalam Perjalanan', 'bg-indigo-100 text-indigo-700 border-indigo-200'],
-    'arrived_at_branch' => ['Tiba di Cabang', 'bg-purple-100 text-purple-700 border-purple-200'],
-    'out_for_delivery' => ['Sedang Diantar', 'bg-orange-100 text-orange-700 border-orange-200'],
-    'delivered' => ['Terkirim', 'bg-green-100 text-green-700 border-green-200'],
-    'cancelled' => ['Dibatalkan', 'bg-red-100 text-red-700 border-red-200'],
-];
-$s = $statusMap[$shipment->status] ?? [$shipment->status, 'bg-gray-100 text-gray-700 border-gray-200'];
-@endphp
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-    <div class="lg:col-span-2 space-y-5">
-        {{-- STATUS --}}
-        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div class="flex flex-wrap items-center gap-4 justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 mb-1">Status</p>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border {{ $s[1] }}">{{ $s[0] }}</span>
-                </div>
-                @if($shipment->payment && $shipment->payment->payment_status === 'pending')
-                <a href="{{ route('customer.payments.checkout', $shipment->payment) }}" class="bg-[#6abf2e] hover:bg-[#4e9020] text-white font-semibold px-4 py-2 rounded-lg text-sm transition-all">
-                    Bayar Sekarang
-                </a>
-                @endif
-            </div>
+{{-- Hero card --}}
+<div class="bg-[#1a2d5a] rounded-2xl p-6 text-white mb-6 shadow-lg">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-1">Nomor Resi</p>
+            <p class="text-2xl font-extrabold tracking-wider">{{ $shipment->tracking_number }}</p>
+            <p class="text-sm text-gray-400 mt-1">{{ $shipment->shipment_date?->format('d M Y') }}</p>
         </div>
+        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold {{ $shipment->status_badge }}">{{ $shipment->status_label }}</span>
+    </div>
 
-        {{-- PENGIRIM & PENERIMA --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h3 class="font-bold text-[#1a2b5c] text-sm mb-3">Pengirim</h3>
-                <p class="font-semibold text-gray-800">{{ $shipment->sender?->name }}</p>
-                <p class="text-sm text-gray-500 mt-0.5">{{ $shipment->sender?->phone }}</p>
-                <p class="text-xs text-gray-400 mt-2">{{ $shipment->originBranch?->name }}</p>
-            </div>
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h3 class="font-bold text-[#1a2b5c] text-sm mb-3">Penerima</h3>
-                <p class="font-semibold text-gray-800">{{ $shipment->receiver?->name }}</p>
-                <p class="text-sm text-gray-500 mt-0.5">{{ $shipment->receiver?->phone }}</p>
-                <p class="text-xs text-gray-400 mt-2">{{ $shipment->destinationBranch?->name }}</p>
-            </div>
+    {{-- Progress bar --}}
+    @php
+        $steps = ['pending','picked_up','in_transit','arrived_at_branch','out_for_delivery','delivered'];
+        $currentIdx = array_search($shipment->status, $steps);
+        if($currentIdx === false) $currentIdx = 0;
+        $progress = $currentIdx === 0 ? 0 : round(($currentIdx / (count($steps)-1)) * 100);
+    @endphp
+    <div class="mb-5">
+        <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+            <span>Menunggu</span>
+            <span>Dalam Perjalanan</span>
+            <span>Terkirim</span>
         </div>
+        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div class="h-full bg-[#6abf2e] rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
+        </div>
+    </div>
 
-        {{-- TIMELINE --}}
-        @if($shipment->trackings->count())
-        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <h3 class="font-bold text-[#1a2b5c] text-sm mb-5">Riwayat Perjalanan</h3>
-            <ol class="relative border-s border-[#6abf2e]/30 ms-3">
-                @foreach($shipment->trackings->sortByDesc('tracked_at') as $track)
-                <li class="mb-5 ms-6">
-                    <span class="absolute flex items-center justify-center w-7 h-7 bg-[#6abf2e] rounded-full -start-3.5 ring-4 ring-white">
-                        <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm pt-4 border-t border-white/10">
+        <div><p class="text-xs text-gray-400 mb-0.5">Pengirim</p><p class="font-semibold">{{ $shipment->sender?->name }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Penerima</p><p class="font-semibold">{{ $shipment->receiver?->name }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Dari</p><p class="font-semibold">{{ $shipment->originBranch?->city }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Tujuan</p><p class="font-semibold">{{ $shipment->destinationBranch?->city }}</p></div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-5">
+    {{-- Timeline --}}
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <h3 class="font-bold text-[#1a2d5a] mb-6">Riwayat Pengiriman</h3>
+        @if($shipment->trackings->isEmpty())
+            <div class="text-center py-8">
+                <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <p class="text-gray-400 text-sm">Belum ada pembaruan status</p>
+            </div>
+        @else
+            <ol class="relative border-l-2 border-gray-100 ml-3">
+                @foreach($shipment->trackings->sortByDesc('tracked_at') as $i => $t)
+                <li class="mb-6 ml-6 last:mb-0">
+                    <span class="absolute -left-3.5 flex items-center justify-center w-6 h-6 rounded-full {{ $i === 0 ? 'bg-[#6abf2e]' : 'bg-gray-200' }}">
+                        @if($i === 0)
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        @else
+                            <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        @endif
                     </span>
-                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
-                            <span class="text-sm font-semibold text-[#1a2b5c]">{{ $track->location }}</span>
-                            <time class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($track->tracked_at)->isoFormat('D MMM, HH:mm') }}</time>
+                    <div class="{{ $i === 0 ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-100' }} rounded-xl p-4">
+                        <div class="flex flex-wrap justify-between gap-1 mb-1">
+                            <span class="font-semibold text-sm text-[#1a2d5a]">{{ $t->status_label }}</span>
+                            <time class="text-xs text-gray-400">{{ $t->tracked_at?->format('d M Y, H:i') }}</time>
                         </div>
-                        <p class="text-xs text-gray-600">{{ $track->description }}</p>
+                        <p class="text-sm text-gray-600">{{ $t->description }}</p>
+                        @if($t->location)<p class="text-xs text-gray-400 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg> {{ $t->location }}</p>@endif
+                        @if($t->images?->isNotEmpty())
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                @foreach($t->images as $img)
+                                    <img src="{{ Storage::url($img->image_path) }}" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
                 </li>
                 @endforeach
             </ol>
-        </div>
         @endif
     </div>
 
-    {{-- SIDEBAR INFO --}}
-    <div class="space-y-4">
-        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <h3 class="font-bold text-[#1a2b5c] text-sm mb-4">Ringkasan</h3>
+    {{-- Detail + Payment --}}
+    <div class="space-y-5">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <h3 class="font-bold text-[#1a2d5a] mb-4">Detail Paket</h3>
             <div class="space-y-3 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Berat</span>
-                    <span class="font-semibold">{{ $shipment->total_weight }} kg</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Total Biaya</span>
-                    <span class="font-bold text-[#6abf2e]">Rp {{ number_format($shipment->total_price, 0, ',', '.') }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Pembayar</span>
-                    <span class="font-semibold capitalize">{{ $shipment->payer_type }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Status Bayar</span>
-                    @php
-                    $payStatus = $shipment->payment?->payment_status ?? 'unpaid';
-                    $payColor = $payStatus === 'paid' ? 'text-green-600' : ($payStatus === 'pending' ? 'text-orange-500' : 'text-red-500');
-                    @endphp
-                    <span class="font-semibold {{ $payColor }}">{{ ucfirst($payStatus) }}</span>
-                </div>
-                @if($shipment->shipment_date)
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Tanggal Kirim</span>
-                    <span class="font-semibold">{{ \Carbon\Carbon::parse($shipment->shipment_date)->isoFormat('D MMM Y') }}</span>
-                </div>
-                @endif
+                <div class="flex justify-between"><span class="text-gray-500">Total Berat</span><span class="font-semibold">{{ number_format($shipment->total_weight,2) }} kg</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Total Biaya</span><span class="font-bold text-[#6abf2e]">Rp {{ number_format($shipment->total_price,0,',','.') }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Pembayaran</span><span class="font-medium">{{ $shipment->payer_type === 'receiver' ? 'COD' : 'Pengirim' }}</span></div>
             </div>
         </div>
 
-        @if($shipment->items->count())
-        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <h3 class="font-bold text-[#1a2b5c] text-sm mb-4">Item Paket</h3>
-            <div class="space-y-2">
-                @foreach($shipment->items as $item)
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-700">{{ $item->name }}</span>
-                    <span class="text-gray-500">{{ $item->weight }} kg</span>
+        {{-- Payment action --}}
+        @if($shipment->payer_type === 'sender' && auth('customer')->id() === $shipment->sender_id)
+            @if($shipment->payment && $shipment->payment->payment_status === 'paid')
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <div><p class="font-semibold text-green-700 text-sm">Pembayaran Lunas</p><p class="text-xs text-green-600">Terima kasih!</p></div>
                 </div>
-                @endforeach
-            </div>
-        </div>
+            @elseif($shipment->payment && $shipment->payment->payment_status === 'pending')
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                    <h3 class="font-bold text-[#1a2d5a] mb-3">Selesaikan Pembayaran</h3>
+                    <p class="text-sm text-gray-500 mb-3">Pembayaran Anda belum selesai.</p>
+                    <a href="{{ route('customer.payments.checkout', $shipment->payment) }}" class="block w-full text-center bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+                        Lanjutkan Pembayaran
+                    </a>
+                </div>
+            @else
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                    <h3 class="font-bold text-[#1a2d5a] mb-3">Bayar Sekarang</h3>
+                    <p class="text-sm text-gray-500 mb-4">Total: <span class="font-bold text-[#1a2d5a]">Rp {{ number_format($shipment->total_price,0,',','.') }}</span></p>
+                    <form action="{{ route('customer.payments.pay', $shipment) }}" method="POST" class="space-y-3">
+                        @csrf
+                        <select name="payment_method" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                            <option value="qris">QRIS</option>
+                            <option value="gopay">GoPay</option>
+                            <option value="bca">Transfer BCA</option>
+                            <option value="bri">Transfer BRI</option>
+                            <option value="bni">Transfer BNI</option>
+                            <option value="bsi">Transfer BSI</option>
+                            <option value="mandiri">Mandiri Echannel</option>
+                        </select>
+                        <button type="submit" class="w-full bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">Bayar</button>
+                    </form>
+                </div>
+            @endif
         @endif
     </div>
 </div>

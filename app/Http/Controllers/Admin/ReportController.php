@@ -60,7 +60,7 @@ class ReportController extends Controller
             'shipments'    => $shipments,
         ];
 
-        $pdf = Pdf::loadView('pdf.shipment-report', $data)
+        $pdf = Pdf::loadView('pdf.report', $data)
                   ->setPaper('a4', 'landscape');
 
         return $pdf->stream('Laporan_Pengiriman_' . now()->format('YmdHis') . '.pdf');

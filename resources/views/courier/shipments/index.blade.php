@@ -1,88 +1,67 @@
 @extends('layouts.dashboard')
-@section('title', 'Tugas Pengiriman - Kurir Trivo')
-@section('sidebar')
-@include('components.courier-sidebar')
-@endsection
-@section('main-content')
-<div class="mb-6">
-    <h1 class="text-2xl font-extrabold text-[#1a2b5c]">Tugas Pengiriman</h1>
-    <p class="text-gray-500 text-sm">Daftar paket yang perlu Anda antar</p>
-</div>
+@section('title', 'Pengiriman Saya')
+@section('page-title', 'Pengiriman Saya')
 
-{{-- STATS --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-    @php
-    $statuses = ['pending'=>['Menunggu','bg-yellow-50 border-yellow-100','text-yellow-600'],'picked_up'=>['Diambil','bg-blue-50 border-blue-100','text-blue-600'],'out_for_delivery'=>['Diantar','bg-orange-50 border-orange-100','text-orange-600'],'delivered'=>['Terkirim','bg-green-50 border-green-100','text-green-600']];
-    @endphp
-    @foreach($statuses as $status => [$label, $bg, $textColor])
-    <div class="rounded-2xl p-4 border {{ $bg }} text-center">
-        <p class="text-2xl font-extrabold {{ $textColor }}">{{ $shipments->where('status', $status)->count() }}</p>
-        <p class="text-xs font-semibold {{ $textColor }} mt-1">{{ $label }}</p>
-    </div>
-    @endforeach
-</div>
-
-<div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-5">
-    <form method="GET" class="flex flex-wrap gap-3 items-end">
+@section('content')
+{{-- Mini stats --}}
+<div class="grid grid-cols-2 gap-4 mb-5">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
+        <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
         <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Status</label>
-            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                <option value="">Semua</option>
-                <option value="pending" {{ request('status')=='pending'?'selected':'' }}>Menunggu</option>
-                <option value="picked_up" {{ request('status')=='picked_up'?'selected':'' }}>Sudah Diambil</option>
-                <option value="out_for_delivery" {{ request('status')=='out_for_delivery'?'selected':'' }}>Sedang Diantar</option>
-                <option value="delivered" {{ request('status')=='delivered'?'selected':'' }}>Terkirim</option>
+            <p class="text-2xl font-extrabold text-[#1a2d5a]">{{ $activeCount }}</p>
+            <p class="text-xs text-gray-500">Sedang Berjalan</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
+        <div class="w-10 h-10 bg-[#6abf2e]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-[#6abf2e]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+            <p class="text-2xl font-extrabold text-[#1a2d5a]">{{ $deliveredCount }}</p>
+            <p class="text-xs text-gray-500">Total Terkirim</p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div class="p-4 border-b border-gray-50">
+        <form method="GET" class="flex flex-wrap gap-3">
+            <select name="status" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                <option value="">Semua Status</option>
+                @foreach(['pending'=>'Menunggu','picked_up'=>'Dijemput','in_transit'=>'Dalam Perjalanan','arrived_at_branch'=>'Tiba di Cabang','out_for_delivery'=>'Sedang Diantar','delivered'=>'Terkirim'] as $v => $l)
+                    <option value="{{ $v }}" {{ request('status')===$v ? 'selected' : '' }}>{{ $l }}</option>
+                @endforeach
             </select>
-        </div>
-        <button type="submit" class="bg-[#1a2b5c] hover:bg-[#111e42] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">Filter</button>
-    </form>
-</div>
-
-<div class="space-y-3">
-    @forelse($shipments as $shipment)
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-[#1a2b5c]/20 transition-all">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="font-mono font-bold text-[#1a2b5c] text-sm">{{ $shipment->tracking_number }}</span>
-                    <x-status-badge :status="$shipment->status"/>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                    <div>
-                        <p class="text-xs text-gray-400">Dari</p>
-                        <p class="font-semibold text-gray-700">{{ $shipment->sender?->name }}</p>
-                        <p class="text-xs text-gray-500">{{ $shipment->originBranch?->city }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400">Ke</p>
-                        <p class="font-semibold text-gray-700">{{ $shipment->receiver?->name }}</p>
-                        <p class="text-xs text-gray-500">{{ $shipment->destinationBranch?->city }}</p>
-                    </div>
-                </div>
-                <div class="mt-2 text-xs text-gray-500">
-                    Berat: <span class="font-semibold">{{ $shipment->total_weight }} kg</span>
-                    @if($shipment->shipment_date)
-                    · Tanggal: <span class="font-semibold">{{ \Carbon\Carbon::parse($shipment->shipment_date)->format('d/m/Y') }}</span>
-                    @endif
-                </div>
-            </div>
-            <div class="flex flex-col gap-2 items-end">
-                <a href="{{ route('courier.shipments.show', $shipment) }}"
-                    class="bg-[#1a2b5c] hover:bg-[#111e42] text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all">
-                    Detail & Update
-                </a>
-            </div>
-        </div>
+            <button type="submit" class="bg-[#1a2d5a] text-white text-sm font-semibold px-5 py-2 rounded-lg">Filter</button>
+            @if(request('status'))<a href="{{ route('courier.shipments.index') }}" class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50">Reset</a>@endif
+        </form>
     </div>
-    @empty
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center text-gray-400">
-        <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-        <p class="text-sm">Tidak ada tugas pengiriman</p>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50"><tr>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">No. Resi</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Penerima</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Tujuan</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+                <th class="px-5 py-3"></th>
+            </tr></thead>
+            <tbody class="divide-y divide-gray-50">
+                @forelse($shipments as $s)
+                <tr class="hover:bg-gray-50/50">
+                    <td class="px-5 py-3.5 font-mono text-xs font-semibold text-[#1a2d5a]">{{ $s->tracking_number }}</td>
+                    <td class="px-5 py-3.5 text-gray-600 hidden sm:table-cell">{{ $s->receiver?->name ?? '-' }}</td>
+                    <td class="px-5 py-3.5 text-gray-500 text-xs hidden md:table-cell">{{ $s->destinationBranch?->city ?? '-' }}</td>
+                    <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $s->status_badge }}">{{ $s->status_label }}</span></td>
+                    <td class="px-5 py-3.5"><a href="{{ route('courier.shipments.show', $s) }}" class="text-[#6abf2e] text-xs font-semibold hover:underline">Detail</a></td>
+                </tr>
+                @empty
+                <tr><td colspan="5" class="px-5 py-10 text-center text-gray-400">Tidak ada data pengiriman</td></tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
-    @endforelse
+    @if($shipments->hasPages())<div class="p-4 border-t border-gray-50">{{ $shipments->links() }}</div>@endif
 </div>
-
-@if($shipments instanceof \Illuminate\Pagination\LengthAwarePaginator && $shipments->hasPages())
-<div class="mt-4">{{ $shipments->links() }}</div>
-@endif
 @endsection

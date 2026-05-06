@@ -1,40 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import 'tailwindcss';
-@plugin 'flowbite/plugin';
-
-:root {
-    --trivo-navy: #1a2b5c;
-    --trivo-green: #6abf2e;
-    --trivo-navy-dark: #111e42;
-    --trivo-green-dark: #4e9020;
-    --trivo-gray: #f5f7fa;
-}
 
 @theme {
-    --color-navy: #1a2b5c;
-    --color-navy-dark: #111e42;
-    --color-green: #6abf2e;
-    --color-green-dark: #4e9020;
+    --color-primary-50: #f0fdf4;
+    --color-primary-100: #dcfce7;
+    --color-primary-200: #bbf7d0;
+    --color-primary-300: #86efac;
+    --color-primary-400: #4ade80;
+    --color-primary-500: #6abf2e;
+    --color-primary-600: #5aaa25;
+    --color-primary-700: #4a8f1e;
+    --color-primary-800: #3a7017;
+    --color-primary-900: #2a5010;
+
+    --color-navy-50: #eef2ff;
+    --color-navy-100: #e0e7ff;
+    --color-navy-600: #1e3a6e;
+    --color-navy-700: #1a3260;
+    --color-navy-800: #162a52;
+    --color-navy-900: #0f1f3d;
 }
 
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+/* Brand Colors */
+:root {
+    --brand-navy: #1a2d5a;
+    --brand-green: #6abf2e;
+    --brand-green-dark: #5aaa25;
 }
 
-.btn-primary {
-    background-color: var(--trivo-navy);
-    color: white;
-    transition: background-color 0.2s;
-}
-.btn-primary:hover {
-    background-color: var(--trivo-navy-dark);
-}
-
-.btn-green {
-    background-color: var(--trivo-green);
-    color: white;
-    transition: background-color 0.2s;
-}
-.btn-green:hover {
-    background-color: var(--trivo-green-dark);
-}
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #6abf2e; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #5aaa25; }

@@ -1,46 +1,48 @@
 @extends('layouts.dashboard')
-@section('title', 'Laporan - Trivo Admin')
-@section('sidebar')
-@include('components.admin-sidebar')
-@endsection
-@section('main-content')
-<div class="mb-6">
-    <h1 class="text-2xl font-extrabold text-[#1a2b5c]">Laporan Pengiriman</h1>
-    <p class="text-gray-500 text-sm">Unduh laporan dalam format PDF</p>
-</div>
+@section('title', 'Laporan')
+@section('page-title', 'Laporan Pengiriman')
 
-<div class="max-w-xl">
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <form method="GET" action="{{ route('admin.reports.generate') }}" target="_blank" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+@section('content')
+<div class="max-w-2xl">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-[#6abf2e]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-[#6abf2e]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-[#1a2d5a]">Generate Laporan PDF</h3>
+                <p class="text-xs text-gray-400">Ekspor data pengiriman berdasarkan rentang tanggal</p>
+            </div>
+        </div>
+
+        @if($errors->any())
+            <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                @foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach
+            </div>
+        @endif
+
+        <form action="{{ route('admin.reports.generate') }}" method="GET" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal Mulai</label>
-                    <input type="text" name="start_date" value="{{ old('start_date') }}" required
-                        placeholder="dd-mm-yyyy"
-                        class="w-full border @error('start_date') border-red-400 @else border-gray-300 @enderror rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none"
-                        id="start_date">
-                    @error('start_date')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    <input type="text" name="start_date" placeholder="DD-MM-YYYY" value="{{ request('start_date') }}" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] focus:border-[#6abf2e] outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal Selesai</label>
-                    <input type="text" name="end_date" value="{{ old('end_date') }}" required
-                        placeholder="dd-mm-yyyy"
-                        class="w-full border @error('end_date') border-red-400 @else border-gray-300 @enderror rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none"
-                        id="end_date">
-                    @error('end_date')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    <input type="text" name="end_date" placeholder="DD-MM-YYYY" value="{{ request('end_date') }}" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] focus:border-[#6abf2e] outline-none">
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Status (Opsional)</label>
-                <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Filter Status (Opsional)</label>
+                <select name="status" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
                     <option value="">Semua Status</option>
-                    @foreach(['pending'=>'Menunggu','picked_up'=>'Diambil','in_transit'=>'Dalam Perjalanan','arrived_at_branch'=>'Di Cabang','out_for_delivery'=>'Sedang Diantar','delivered'=>'Terkirim','cancelled'=>'Dibatalkan'] as $val => $label)
-                    <option value="{{ $val }}">{{ $label }}</option>
+                    @foreach(['pending'=>'Menunggu','picked_up'=>'Dijemput','in_transit'=>'Dalam Perjalanan','arrived_at_branch'=>'Tiba di Cabang','out_for_delivery'=>'Sedang Diantar','delivered'=>'Terkirim','cancelled'=>'Dibatalkan'] as $v => $l)
+                        <option value="{{ $v }}" {{ request('status')===$v ? 'selected' : '' }}>{{ $l }}</option>
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="w-full bg-[#1a2b5c] hover:bg-[#111e42] text-white font-semibold py-3 rounded-lg text-sm transition-all flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <button type="submit" class="w-full bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Unduh Laporan PDF
             </button>
         </form>

@@ -1,53 +1,57 @@
 @extends('layouts.app')
-
 @section('title', 'Lacak Paket - Trivo')
 
 @section('content')
-
-<nav class="fixed w-full z-50 top-0 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <a href="{{ route('home') }}" class="flex items-center">
-                <img src="{{ asset('images/branding/logo.png') }}" alt="Trivo" class="h-10">
-            </a>
-            <div class="flex items-center gap-4">
-                <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-[#1a2b5c] transition-colors">← Beranda</a>
-                <a href="{{ route('customer.login') }}" class="text-sm font-semibold bg-[#1a2b5c] text-white px-4 py-2 rounded-lg hover:bg-[#111e42] transition-all">Masuk</a>
-            </div>
+<div class="min-h-[60vh] flex flex-col items-center justify-center py-16 px-4">
+    <div class="text-center mb-10">
+        <div class="w-16 h-16 bg-[#6abf2e]/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <svg class="w-8 h-8 text-[#6abf2e]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
-    </div>
-</nav>
-
-<div class="min-h-screen bg-gray-50 pt-16">
-    <div class="bg-[#1a2b5c] py-14">
-        <div class="max-w-2xl mx-auto px-6 text-center">
-            <h1 class="text-3xl font-extrabold text-white mb-2">Lacak Paket Anda</h1>
-            <p class="text-gray-300 text-sm">Masukkan nomor resi untuk melihat status pengiriman</p>
-        </div>
+        <h1 class="text-3xl font-extrabold text-[#1a2d5a]">Lacak Paket Anda</h1>
+        <p class="text-gray-500 mt-2 text-sm">Masukkan nomor resi untuk melihat status pengiriman terkini.</p>
     </div>
 
-    <div class="max-w-2xl mx-auto px-6 -mt-6">
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            @if($errors->any())
-            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                {{ $errors->first('resi') }}
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8">
+        @if($errors->any())
+            <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                {{ $errors->first() }}
             </div>
-            @endif
-            <form action="{{ route('track') }}" method="POST">
-                @csrf
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Resi</label>
-                <div class="flex gap-3 flex-col sm:flex-row">
-                    <input type="text" name="tracking_number" value="{{ request('resi') }}" placeholder="Masukkan nomor resi..."
-                        class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1a2b5c] focus:border-transparent outline-none uppercase" required>
-                    <button type="submit" class="bg-[#1a2b5c] hover:bg-[#111e42] text-white font-semibold px-6 py-3 rounded-lg text-sm transition-all whitespace-nowrap">
-                        Lacak Sekarang
-                    </button>
+        @endif
+
+        <form action="{{ route('track') }}" method="POST">
+            @csrf
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Resi</label>
+            <div class="flex gap-2">
+                <input type="text" name="tracking_number" value="{{ request('resi') }}" placeholder="Contoh: KA65A3F2B..." class="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] focus:border-[#6abf2e] outline-none uppercase" style="text-transform: uppercase">
+                <button type="submit" class="bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-semibold px-5 py-3 rounded-xl text-sm transition-colors">
+                    Lacak
+                </button>
+            </div>
+            <p class="text-gray-400 text-xs mt-2">Nomor resi dimulai dengan "KA" dan bisa ditemukan di struk pengiriman Anda.</p>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-gray-100">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Status Pengiriman</p>
+            <div class="space-y-3">
+                @php
+                    $statuses = [
+                        ['color' => 'yellow', 'label' => 'Menunggu', 'desc' => 'Paket sedang menunggu proses penjemputan'],
+                        ['color' => 'blue', 'label' => 'Dijemput', 'desc' => 'Paket sedang dalam proses penjemputan'],
+                        ['color' => 'indigo', 'label' => 'Dalam Perjalanan', 'desc' => 'Paket sedang dalam perjalanan'],
+                        ['color' => 'orange', 'label' => 'Sedang Diantar', 'desc' => 'Paket sedang diantar ke alamat tujuan'],
+                        ['color' => 'green', 'label' => 'Terkirim', 'desc' => 'Paket telah berhasil diterima'],
+                    ];
+                @endphp
+                @foreach($statuses as $s)
+                <div class="flex items-center gap-3">
+                    <span class="w-2.5 h-2.5 rounded-full bg-{{ $s['color'] }}-500 flex-shrink-0"></span>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-700">{{ $s['label'] }}</span>
+                        <span class="text-xs text-gray-400 ml-2">— {{ $s['desc'] }}</span>
+                    </div>
                 </div>
-            </form>
-        </div>
-
-        <div class="mt-8 text-center text-gray-400 text-sm">
-            <p>Belum memiliki akun? <a href="{{ route('customer.register') }}" class="text-[#1a2b5c] font-semibold hover:text-[#6abf2e]">Daftar sekarang</a> untuk pelacakan lebih mudah.</p>
+                @endforeach
+            </div>
         </div>
     </div>
 </div>

@@ -1,73 +1,53 @@
 @extends('layouts.dashboard')
-@section('title', 'Pembayaran - Kasir Trivo')
-@section('sidebar')
-@include('components.cashier-sidebar')
-@endsection
-@section('main-content')
-<div class="mb-6">
-    <h1 class="text-2xl font-extrabold text-[#1a2b5c]">Pembayaran</h1>
-    <p class="text-gray-500 text-sm">Daftar transaksi pembayaran di cabang Anda</p>
-</div>
+@section('title', 'Pembayaran')
+@section('page-title', 'Pembayaran')
 
-<div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-5">
-    <form method="GET" class="flex flex-wrap gap-3 items-end">
-        <div class="flex-1 min-w-48">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Cari Resi</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Nomor resi..."
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-        </div>
-        <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Status</label>
-            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                <option value="">Semua</option>
-                <option value="pending" {{ request('status')=='pending'?'selected':'' }}>Menunggu</option>
-                <option value="paid" {{ request('status')=='paid'?'selected':'' }}>Lunas</option>
-                <option value="failed" {{ request('status')=='failed'?'selected':'' }}>Gagal</option>
+@section('content')
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div class="p-4 border-b border-gray-50">
+        <form method="GET" class="flex gap-3">
+            <select name="status" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                <option value="">Semua Status</option>
+                <option value="pending" {{ request('status')==='pending' ? 'selected' : '' }}>Menunggu</option>
+                <option value="paid" {{ request('status')==='paid' ? 'selected' : '' }}>Lunas</option>
             </select>
-        </div>
-        <button type="submit" class="bg-[#1a2b5c] hover:bg-[#111e42] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">Filter</button>
-        @if(request()->anyFilled(['search','status']))
-        <a href="{{ route('cashier.payments.index') }}" class="text-sm text-gray-500 hover:text-red-500 py-2">Reset</a>
-        @endif
-    </form>
-</div>
-
-<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <button type="submit" class="bg-[#1a2d5a] text-white text-sm font-semibold px-5 py-2 rounded-lg">Filter</button>
+        </form>
+    </div>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <tr>
-                    <th class="px-5 py-3 text-left">Resi</th>
-                    <th class="px-5 py-3 text-left">Pengirim</th>
-                    <th class="px-5 py-3 text-left">Jumlah</th>
-                    <th class="px-5 py-3 text-left">Metode</th>
-                    <th class="px-5 py-3 text-left">Status</th>
-                    <th class="px-5 py-3 text-left">Tanggal</th>
-                    <th class="px-5 py-3 text-left">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse($payments as $payment)
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3 font-mono text-xs font-semibold text-[#1a2b5c]">{{ $payment->shipment?->tracking_number }}</td>
-                    <td class="px-5 py-3 text-gray-700">{{ $payment->shipment?->sender?->name ?? '-' }}</td>
-                    <td class="px-5 py-3 font-semibold text-gray-800">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
-                    <td class="px-5 py-3 text-gray-600 capitalize">{{ $payment->payment_method ?? '-' }}</td>
-                    <td class="px-5 py-3"><x-status-badge :status="$payment->payment_status"/></td>
-                    <td class="px-5 py-3 text-gray-500 text-xs">{{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') : '-' }}</td>
-                    <td class="px-5 py-3">
-                        <a href="{{ route('cashier.payments.print', $payment) }}" target="_blank"
-                            class="text-[#1a2b5c] hover:text-[#6abf2e] font-semibold text-xs transition-colors">Kwitansi</a>
+            <thead class="bg-gray-50"><tr>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">No. Resi</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Pengirim</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Jumlah</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+                <th class="px-5 py-3"></th>
+            </tr></thead>
+            <tbody class="divide-y divide-gray-50">
+                @forelse($payments as $p)
+                <tr class="hover:bg-gray-50/50">
+                    <td class="px-5 py-3.5 font-mono text-xs font-semibold text-[#1a2d5a]">{{ $p->shipment?->tracking_number ?? '-' }}</td>
+                    <td class="px-5 py-3.5 text-gray-600 hidden sm:table-cell">{{ $p->shipment?->sender?->name ?? '-' }}</td>
+                    <td class="px-5 py-3.5 font-semibold text-gray-700">Rp {{ number_format($p->amount, 0, ',', '.') }}</td>
+                    <td class="px-5 py-3.5">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $p->payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                            {{ $p->payment_status === 'paid' ? 'Lunas' : 'Menunggu' }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3.5">
+                        @if($p->payment_status === 'paid')
+                            <a href="{{ route('cashier.payments.print-receipt', $p) }}" target="_blank" class="text-[#6abf2e] text-xs font-semibold hover:underline">Cetak</a>
+                        @elseif($p->shipment)
+                            <a href="{{ route('cashier.payments.create', $p->shipment) }}" class="text-[#1a2d5a] text-xs font-semibold hover:underline">Bayar</a>
+                        @endif
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center py-12 text-gray-400 text-sm">Belum ada pembayaran</td></tr>
+                <tr><td colspan="5" class="px-5 py-10 text-center text-gray-400">Tidak ada data pembayaran</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    @if($payments->hasPages())
-    <div class="px-5 py-4 border-t border-gray-100">{{ $payments->links() }}</div>
-    @endif
+    @if($payments->hasPages())<div class="p-4 border-t border-gray-50">{{ $payments->links() }}</div>@endif
 </div>
 @endsection

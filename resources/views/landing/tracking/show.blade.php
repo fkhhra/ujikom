@@ -1,128 +1,128 @@
 @extends('layouts.app')
-
-@section('title', 'Detail Resi ' . $shipment->tracking_number . ' - Trivo')
+@section('title', 'Resi ' . $shipment->tracking_number . ' - Trivo')
 
 @section('content')
+<div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="mb-6">
+        <a href="{{ route('tracking') }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#1a2d5a] transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Kembali ke Lacak Paket
+        </a>
+    </div>
 
-<nav class="fixed w-full z-50 top-0 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <a href="{{ route('home') }}" class="flex items-center">
-                <img src="{{ asset('images/branding/logo.png') }}" alt="Trivo" class="h-10">
-            </a>
-            <div class="flex items-center gap-4">
-                <a href="{{ route('tracking') }}" class="text-sm text-gray-600 hover:text-[#1a2b5c] transition-colors">← Lacak Lagi</a>
-                <a href="{{ route('customer.login') }}" class="text-sm font-semibold bg-[#1a2b5c] text-white px-4 py-2 rounded-lg hover:bg-[#111e42] transition-all">Masuk</a>
+    {{-- Header card --}}
+    <div class="bg-[#1a2d5a] rounded-2xl p-6 text-white mb-6 shadow-lg">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-1">Nomor Resi</p>
+                <p class="text-2xl font-extrabold tracking-wider">{{ $shipment->tracking_number }}</p>
+                <p class="text-sm text-gray-400 mt-1">{{ $shipment->shipment_date?->format('d M Y') }}</p>
+            </div>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold {{ $shipment->status_badge }}">
+                {{ $shipment->status_label }}
+            </span>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/10">
+            <div>
+                <p class="text-xs text-gray-400 mb-0.5">Asal</p>
+                <p class="font-semibold text-sm">{{ $shipment->originBranch?->city ?? '-' }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 mb-0.5">Tujuan</p>
+                <p class="font-semibold text-sm">{{ $shipment->destinationBranch?->city ?? '-' }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 mb-0.5">Pengirim</p>
+                <p class="font-semibold text-sm">{{ $shipment->sender?->name ?? '-' }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 mb-0.5">Penerima</p>
+                <p class="font-semibold text-sm">{{ $shipment->receiver?->name ?? '-' }}</p>
             </div>
         </div>
     </div>
-</nav>
 
-<div class="min-h-screen bg-gray-50 pt-16">
-    <div class="bg-[#1a2b5c] py-10">
-        <div class="max-w-4xl mx-auto px-6">
-            <p class="text-gray-400 text-sm mb-1">Nomor Resi</p>
-            <h1 class="text-2xl font-extrabold text-white tracking-widest">{{ $shipment->tracking_number }}</h1>
-        </div>
-    </div>
+    {{-- Tracking timeline --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h3 class="font-bold text-[#1a2d5a] mb-6">Riwayat Pengiriman</h3>
 
-    <div class="max-w-4xl mx-auto px-6 py-8 space-y-5">
-
-        {{-- STATUS BADGE --}}
-        @php
-        $statusMap = [
-            'pending'           => ['label' => 'Menunggu', 'color' => 'bg-yellow-100 text-yellow-700 border-yellow-200'],
-            'picked_up'         => ['label' => 'Diambil Kurir', 'color' => 'bg-blue-100 text-blue-700 border-blue-200'],
-            'in_transit'        => ['label' => 'Dalam Perjalanan', 'color' => 'bg-indigo-100 text-indigo-700 border-indigo-200'],
-            'arrived_at_branch' => ['label' => 'Tiba di Cabang', 'color' => 'bg-purple-100 text-purple-700 border-purple-200'],
-            'out_for_delivery'  => ['label' => 'Sedang Diantar', 'color' => 'bg-orange-100 text-orange-700 border-orange-200'],
-            'delivered'         => ['label' => 'Terkirim', 'color' => 'bg-green-100 text-green-700 border-green-200'],
-            'cancelled'         => ['label' => 'Dibatalkan', 'color' => 'bg-red-100 text-red-700 border-red-200'],
-        ];
-        $s = $statusMap[$shipment->status] ?? ['label' => $shipment->status, 'color' => 'bg-gray-100 text-gray-700 border-gray-200'];
-        @endphp
-
-        <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-            <div class="flex flex-wrap items-center gap-4 justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 mb-1">Status Pengiriman</p>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border {{ $s['color'] }}">{{ $s['label'] }}</span>
-                </div>
-                <div class="text-right">
-                    <p class="text-xs text-gray-500 mb-1">Tanggal Pengiriman</p>
-                    <p class="font-semibold text-[#1a2b5c] text-sm">{{ $shipment->shipment_date ? \Carbon\Carbon::parse($shipment->shipment_date)->isoFormat('D MMMM Y') : '-' }}</p>
-                </div>
+        @if($shipment->trackings->isEmpty())
+            <div class="text-center py-8">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <p class="text-gray-400 text-sm">Belum ada riwayat pengiriman</p>
             </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {{-- PENGIRIM --}}
-            <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                <h3 class="font-bold text-[#1a2b5c] text-sm mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-[#6abf2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    Pengirim
-                </h3>
-                <p class="font-semibold text-gray-800">{{ $shipment->sender?->name ?? '-' }}</p>
-                <p class="text-sm text-gray-500 mt-0.5">{{ $shipment->sender?->phone ?? '' }}</p>
-                <p class="text-sm text-gray-500 mt-1">{{ $shipment->originBranch?->name }} — {{ $shipment->originBranch?->city }}</p>
-            </div>
-
-            {{-- PENERIMA --}}
-            <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-                <h3 class="font-bold text-[#1a2b5c] text-sm mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-[#6abf2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                    Penerima
-                </h3>
-                <p class="font-semibold text-gray-800">{{ $shipment->receiver?->name ?? '-' }}</p>
-                <p class="text-sm text-gray-500 mt-0.5">{{ $shipment->receiver?->phone ?? '' }}</p>
-                <p class="text-sm text-gray-500 mt-1">{{ $shipment->destinationBranch?->name }} — {{ $shipment->destinationBranch?->city }}</p>
-            </div>
-        </div>
-
-        {{-- DETAIL PAKET --}}
-        <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-            <h3 class="font-bold text-[#1a2b5c] text-sm mb-4">Detail Paket</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div class="bg-gray-50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 mb-1">Total Berat</p>
-                    <p class="font-bold text-[#1a2b5c]">{{ $shipment->total_weight }} kg</p>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 mb-1">Total Biaya</p>
-                    <p class="font-bold text-[#6abf2e]">Rp {{ number_format($shipment->total_price, 0, ',', '.') }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 mb-1">Pembayar</p>
-                    <p class="font-bold text-[#1a2b5c] capitalize">{{ $shipment->payer_type }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 mb-1">Status Bayar</p>
-                    <p class="font-bold text-[#1a2b5c]">{{ $shipment->payment?->payment_status ? ucfirst($shipment->payment->payment_status) : 'Belum Bayar' }}</p>
-                </div>
-            </div>
-        </div>
-
-        {{-- TIMELINE --}}
-        @if($shipment->trackings->count())
-        <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-            <h3 class="font-bold text-[#1a2b5c] text-sm mb-5">Riwayat Perjalanan</h3>
-            <ol class="relative border-s border-[#6abf2e]/30 ms-3">
-                @foreach($shipment->trackings->sortByDesc('tracked_at') as $track)
-                <li class="mb-6 ms-6">
-                    <span class="absolute flex items-center justify-center w-7 h-7 bg-[#6abf2e] rounded-full -start-3.5 ring-4 ring-white">
-                        <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        @else
+            <ol class="relative border-l-2 border-gray-100 ml-3">
+                @foreach($shipment->trackings->reverse() as $i => $tracking)
+                <li class="mb-6 ml-6 last:mb-0">
+                    <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3.5 {{ $i === 0 ? 'bg-[#6abf2e]' : 'bg-gray-200' }}">
+                        @if($i === 0)
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        @else
+                            <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        @endif
                     </span>
-                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
-                            <span class="text-sm font-semibold text-[#1a2b5c]">{{ $track->location }}</span>
-                            <time class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($track->tracked_at)->isoFormat('D MMM Y, HH:mm') }}</time>
+                    <div class="{{ $i === 0 ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-100' }} rounded-xl p-4">
+                        <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                            <span class="font-semibold text-sm text-[#1a2d5a]">{{ $tracking->status_label }}</span>
+                            <time class="text-xs text-gray-400">{{ $tracking->tracked_at?->format('d M Y, H:i') }}</time>
                         </div>
-                        <p class="text-xs text-gray-600">{{ $track->description }}</p>
+                        <p class="text-sm text-gray-600">{{ $tracking->description }}</p>
+                        @if($tracking->location)
+                            <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                {{ $tracking->location }}
+                            </p>
+                        @endif
                     </div>
                 </li>
                 @endforeach
             </ol>
+        @endif
+    </div>
+
+    {{-- Shipment details --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-bold text-[#1a2d5a] mb-5">Detail Pengiriman</h3>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="text-gray-400 text-xs mb-0.5">Total Berat</p>
+                <p class="font-semibold text-gray-700">{{ number_format($shipment->total_weight, 1) }} kg</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-xs mb-0.5">Total Harga</p>
+                <p class="font-semibold text-gray-700">Rp {{ number_format($shipment->total_price, 0, ',', '.') }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-xs mb-0.5">Pembayaran</p>
+                <p class="font-semibold text-gray-700">{{ $shipment->isCod() ? 'COD (Bayar di Tempat)' : 'Dibayar Pengirim' }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-xs mb-0.5">Status Pembayaran</p>
+                @if($shipment->payment)
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $shipment->payment->payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                        {{ $shipment->payment->payment_status === 'paid' ? 'Lunas' : 'Menunggu' }}
+                    </span>
+                @else
+                    <span class="text-gray-400 text-xs">—</span>
+                @endif
+            </div>
         </div>
+
+        @if($shipment->items->isNotEmpty())
+            <div class="mt-5 pt-5 border-t border-gray-100">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Item Paket</p>
+                <div class="space-y-2">
+                    @foreach($shipment->items as $item)
+                    <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">{{ $item->name }}</p>
+                            <p class="text-xs text-gray-400">{{ $item->quantity }}x · {{ number_format($item->weight, 2) }} kg</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
         @endif
     </div>
 </div>

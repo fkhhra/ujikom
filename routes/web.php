@@ -110,7 +110,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,manager'
 
     Route::controller(Admin\PaymentController::class)->prefix('payments')->name('payments.')->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/{payment}/print-receipt', 'printReceipt')->name('print');
+        Route::get('/{payment}/print-receipt', 'printReceipt')->name('print-receipt');
     });
 });
 

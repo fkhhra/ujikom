@@ -1,85 +1,73 @@
 @extends('layouts.dashboard')
-@section('title', 'Tambah Pengguna - Trivo Admin')
+@section('title', 'Tambah Staff')
+@section('page-title', 'Tambah Staff Baru')
 
-@section('sidebar')
-@include('components.admin-sidebar')
-@endsection
-
-@section('main-content')
-<div class="mb-6">
-    <a href="{{ route('admin.users.index') }}" class="text-sm text-gray-500 hover:text-[#1a2b5c] transition-colors">← Kembali</a>
-    <h1 class="text-2xl font-extrabold text-[#1a2b5c] mt-1">Tambah Pengguna</h1>
-</div>
-
-<div class="max-w-2xl">
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-4">
+@section('content')
+<div class="max-w-lg">
+    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#1a2d5a] mb-5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Kembali
+    </a>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-4">
             @csrf
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="sm:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lengkap</label>
-                    <input type="text" name="name" value="{{ old('name') }}" required
-                        class="w-full border @error('name') border-red-400 @else border-gray-300 @enderror rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-                    @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required
-                        class="w-full border @error('email') border-red-400 @else border-gray-300 @enderror rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-                    @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama</label>
+                <input type="text" name="name" value="{{ old('name') }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none @error('name') border-red-400 @enderror">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none @error('email') border-red-400 @enderror">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">No. Telepon</label>
+                <input type="text" name="phone" value="{{ old('phone') }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
-                    <input type="password" name="password" required
-                        class="w-full border @error('password') border-red-400 @else border-gray-300 @enderror rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none">
-                    @error('password')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    <input type="password" name="password" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none @error('password') border-red-400 @enderror">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Role</label>
-                    <select name="role" required id="role-select"
-                        class="w-full border @error('role') border-red-400 @else border-gray-300 @enderror rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                        <option value="">Pilih role...</option>
-                        <option value="admin" {{ old('role')=='admin'?'selected':'' }}>Admin</option>
-                        <option value="manager" {{ old('role')=='manager'?'selected':'' }}>Manager</option>
-                        <option value="cashier" {{ old('role')=='cashier'?'selected':'' }}>Kasir</option>
-                        <option value="courier" {{ old('role')=='courier'?'selected':'' }}>Kurir</option>
-                    </select>
-                    @error('role')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Cabang</label>
-                    <select name="branch_id"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                        <option value="">Pilih cabang...</option>
-                        @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}" {{ old('branch_id')==$branch->id?'selected':'' }}>{{ $branch->name }} — {{ $branch->city }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div id="vehicle-field" class="sm:col-span-2 hidden">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kendaraan (Opsional)</label>
-                    <select name="vehicle_id"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1a2b5c] outline-none bg-white">
-                        <option value="">Tanpa kendaraan</option>
-                        @foreach($vehicles as $vehicle)
-                        <option value="{{ $vehicle->id }}" {{ old('vehicle_id')==$vehicle->id?'selected':'' }}>{{ $vehicle->plate_number }} — {{ $vehicle->type }}</option>
-                        @endforeach
-                    </select>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Konfirmasi</label>
+                    <input type="password" name="password_confirmation" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none">
                 </div>
             </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Role</label>
+                <select name="role" id="role-select" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white @error('role') border-red-400 @enderror">
+                    <option value="">Pilih role</option>
+                    @foreach(['admin'=>'Admin','manager'=>'Manager','cashier'=>'Kasir','courier'=>'Kurir'] as $v => $l)
+                        <option value="{{ $v }}" {{ old('role')===$v ? 'selected' : '' }}>{{ $l }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Cabang</label>
+                <select name="branch_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white @error('branch_id') border-red-400 @enderror">
+                    <option value="">Pilih cabang</option>
+                    @foreach($branches as $b)<option value="{{ $b->id }}" {{ old('branch_id')==$b->id ? 'selected' : '' }}>{{ $b->name }}</option>@endforeach
+                </select>
+            </div>
+            <div id="vehicle-section" class="hidden">
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kendaraan (Kurir)</label>
+                <select name="vehicle_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#6abf2e] outline-none bg-white">
+                    <option value="">Pilih kendaraan (opsional)</option>
+                    @foreach($vehicles as $v)<option value="{{ $v->id }}" {{ old('vehicle_id')==$v->id ? 'selected' : '' }}>{{ $v->plate_number }} ({{ $v->type }})</option>@endforeach
+                </select>
+            </div>
             <div class="flex gap-3 pt-2">
-                <button type="submit" class="bg-[#6abf2e] hover:bg-[#4e9020] text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-all">Simpan</button>
-                <a href="{{ route('admin.users.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-2.5 rounded-lg text-sm transition-all">Batal</a>
+                <button type="submit" class="bg-[#6abf2e] hover:bg-[#5aaa25] text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors">Simpan</button>
+                <a href="{{ route('admin.users.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors">Batal</a>
             </div>
         </form>
     </div>
 </div>
 @endsection
-
 @push('scripts')
 <script>
 document.getElementById('role-select').addEventListener('change', function() {
-    document.getElementById('vehicle-field').classList.toggle('hidden', this.value !== 'courier');
+    document.getElementById('vehicle-section').classList.toggle('hidden', this.value !== 'courier');
 });
+if (document.getElementById('role-select').value === 'courier') document.getElementById('vehicle-section').classList.remove('hidden');
 </script>
 @endpush
